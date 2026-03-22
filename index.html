@@ -8,14 +8,31 @@
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      color: white;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #4a1d5d;
+      overflow-x: hidden;
+    }
+
+    #bg-video {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: -2;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(255, 255, 255, 0.1); 
+      z-index: -1;
     }
 
     h1 {
       text-align: center;
-      margin: 20px 0;
+      margin: 40px 0;
+      font-size: 2.5rem;
+      color: #ffffff;
+      text-shadow: 2px 4px 8px rgba(74, 29, 93, 0.5);
     }
 
     .lobby {
@@ -28,169 +45,158 @@
     }
 
     .card {
-      background: #1e293b;
-      padding: 30px;
+      background: rgba(255, 255, 255, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      padding: 30px 15px;
       border-radius: 20px;
       text-align: center;
       cursor: pointer;
-      transition: 0.3s;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+      transition: 0.4s;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      color: #ffffff;
+      font-weight: 600;
     }
 
     .card:hover {
-      transform: scale(1.05);
-      background: #334155;
+      transform: translateY(-10px);
+      background: rgba(255, 255, 255, 0.4);
     }
 
     .section {
       display: none;
       max-width: 500px;
       margin: 30px auto;
-      background: #1e293b;
-      padding: 20px;
-      border-radius: 20px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+      background: rgba(255, 255, 255, 0.9);
+      padding: 25px;
+      border-radius: 25px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
     }
+
+    h2, h3 { color: #8e65a6; margin-top: 10px; }
 
     input, textarea {
       width: 100%;
-      padding: 10px;
-      border-radius: 10px;
-      border: none;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
       margin-bottom: 10px;
-      outline: none;
+      box-sizing: border-box;
+      font-family: inherit;
     }
 
     button {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       border: none;
-      border-radius: 10px;
-      background: #22c55e;
+      border-radius: 12px;
+      background: #a37eb8;
       color: white;
+      font-weight: bold;
       cursor: pointer;
-      margin-top: 10px;
+      margin-top: 5px;
     }
 
-    ul {
-      list-style: none;
-      padding: 0;
+    button:hover { background: #8e65a6; }
+
+    .btn-volver {
+      background: #f8bbd0;
+      color: #4a1d5d;
+      margin-top: 25px;
+    }
+
+    /* Estilos para el Chat y Listas */
+    #mensajes, #listaGustos, #lista {
       margin-top: 15px;
     }
 
-    li {
-      display: flex;
-      justify-content: space-between;
-      background: #334155;
-      margin-bottom: 10px;
-      padding: 10px;
-      border-radius: 10px;
-    }
-
-    /* GALERIA */
-    #galeria {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 15px;
-    }
-
-    .foto-card {
-      position: relative;
-      background: #0f172a;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .foto-card img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-    }
-
-    .foto-texto {
-      padding: 5px;
-      font-size: 12px;
-      text-align: center;
-    }
-
-    .borrar-foto {
-      position: absolute;
-      top: 5px;
-      right: 8px;
+    #fotoModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
       cursor: pointer;
-      font-size: 14px;
-      background: rgba(0,0,0,0.5);
-      padding: 2px 6px;
-      border-radius: 5px;
     }
-
   </style>
 </head>
 <body>
 
+  <video autoplay muted loop playsinline id="bg-video">
+    <source src="https://files.catbox.moe/qhhktl.mp4" type="video/mp4">
+  </video>
+  <div class="overlay"></div>
+
   <h1>❤️ Nuestro Lobby</h1>
 
   <div class="lobby" id="lobby">
-    <div class="card" onclick="abrir('metas')">🎯 Metas</div>
-    <div class="card" onclick="abrir('chat')">💬 Chat</div>
-    <div class="card" onclick="abrir('recuerdos')">📸 Recuerdos</div>
-    <div class="card" onclick="abrir('sorpresa')">🎁 Sorpresa</div>
-    <div class="card" onclick="abrir('gustos')">❤️ Gustos</div>
+    <div class="card" onclick="abrir('metas')">🎯<br>Metas</div>
+    <div class="card" onclick="abrir('chat')">💬<br>Chat</div>
+    <div class="card" onclick="abrir('recuerdos')">📸<br>Recuerdos</div>
+    <div class="card" onclick="abrir('sorpresa')">🎁<br>Sorpresa</div>
+    <div class="card" onclick="abrir('gustos')">❤️<br>Gustos</div>
   </div>
 
-  <!-- METAS -->
   <div id="metas" class="section">
-    <h2>Metas 🎯</h2>
-    <input id="metaInput" placeholder="Meta...">
-    <button onclick="guardarMeta(document.getElementById('metaInput').value)">Guardar</button>
+    <h2>Nuestras Metas 🎯</h2>
+    <input id="metaInput" placeholder="Escribe una meta juntos...">
+    <button onclick="guardarMeta(document.getElementById('metaInput').value)">Guardar Meta</button>
     <ul id="lista"></ul>
-    <button onclick="volver()">⬅ Volver</button>
+    <button class="btn-volver" onclick="volver()">⬅ Volver</button>
   </div>
 
-  <!-- RECUERDOS -->
   <div id="recuerdos" class="section">
     <h2>Recuerdos 📸</h2>
-
+    <label>Selecciona una foto:</label>
     <input type="file" id="fotoInput">
-    <textarea id="textoFoto" placeholder="Escribe algo sobre la foto..."></textarea>
-
-    <button onclick="subirFoto()">Subir foto</button>
-
-    <div id="galeria"></div>
-
-    <button onclick="volver()">⬅ Volver</button>
+    <textarea id="textoFoto" placeholder="Escribe algo sobre este momento..."></textarea>
+    <button onclick="subirFoto()">Subir a la Galería</button>
+    <div id="galeria" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px;"></div>
+    <button class="btn-volver" onclick="volver()">⬅ Volver</button>
   </div>
-  <!-- Sorpresa -->
+
   <div id="sorpresa" class="section">
-   <h2>Sorpresas 🎁</h2>
-
-   <h3>Crear sorpresa</h3>
-   <textarea id="mensajeCrear" placeholder="Escribe la sorpresa..."></textarea>
-   <input id="clicksNecesarios" type="number" placeholder="Cantidad de clicks">
-   <button onclick="crearSorpresa()">Guardar</button>
-   <input type="file" id="archivoSorpresa">
-   <hr>
-
-   <h3>Descubre la sorpresa</h3>
-   <button id="botonSorpresa" onclick="sumarClick()">
-  🎁 0 clicks
-</button>
-
-   <div id="resultadoSorpresa"></div>
-
-   <button onclick="volver()">⬅ Volver</button>
+    <h2>Sorpresas 🎁</h2>
+    <h3>Crear sorpresa</h3>
+    <textarea id="mensajeCrear" placeholder="Escribe la sorpresa..."></textarea>
+    <input id="clicksNecesarios" type="number" placeholder="Cantidad de clicks">
+    <label>Archivo (Opcional):</label>
+    <input type="file" id="archivoSorpresa">
+    <button onclick="crearSorpresa()">Guardar</button>
+    <hr>
+    <h3>Descubre la sorpresa</h3>
+    <button id="botonSorpresa" onclick="sumarClick()" style="font-size: 1.2rem; padding: 15px;">
+      🎁 0 clicks
+    </button>
+    <div id="resultadoSorpresa"></div>
+    <button class="btn-volver" onclick="volver()">⬅ Volver</button>
   </div>
-  <!-- CHAT -->
+
   <div id="chat" class="section">
     <h2>Chat 💬</h2>
-
-    <div id="mensajes" style="max-height:300px; overflow-y:auto; padding:10px;"></div>
+    <div id="mensajes" style="max-height:300px; overflow-y:auto; padding:10px; background: rgba(255,255,255,0.5); border-radius: 10px;"></div>
     <input id="nombreInput" placeholder="Tu nombre...">
     <input id="mensajeInput" placeholder="Escribe un mensaje...">
     <button onclick="enviarMensaje()">Enviar</button>
+    <button class="btn-volver" onclick="volver()">⬅ Volver</button>
+  </div>
 
-    <button onclick="volver()">⬅ Volver</button>
+  <div id="gustos" class="section">
+    <h2>Nuestros Gustos ❤️</h2>
+    <label>Sube algo multimedia:</label>
+    <input type="file" id="gustoInput" accept="image/*,video/*,audio/*">
+    <textarea id="textoGusto" placeholder="¿Qué nos gusta?"></textarea>
+    <button onclick="subirGusto()">Añadir a la lista</button>
+    <div id="listaGustos"></div>
+    <button class="btn-volver" onclick="volver()">⬅ Volver</button>
+  </div>
+
+  <div id="fotoModal" onclick="if(event.target == this) cerrarModal()">
+    <span onclick="cerrarModal()" style="position:absolute; top:20px; right:30px; font-size:50px; color:white; font-weight:bold;">&times;</span>
+    <img id="imgModal" style="max-width:90%; max-height:80%; border-radius:15px; border: 3px solid white;">
+    <p id="textoModal" style="color:white; margin-top:20px; font-size:1.2rem; text-align:center;"></p>
   </div>
 
   <script>
@@ -198,33 +204,16 @@
       document.getElementById('lobby').style.display = 'none';
       document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
       document.getElementById(id).style.display = 'block';
+      if (id === 'chat') {
+        const m = document.getElementById("mensajes");
+        m.scrollTop = m.scrollHeight;
+      }
     }
-
     function volver() {
       document.getElementById('lobby').style.display = 'grid';
       document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
     }
   </script>
-
   <script type="module" src="app.js"></script>
-  <!-- Gustos -->
-  <div id="gustos" class="section">
-   <h2>Nuestros Gustos ❤️</h2>
-  
-   <input type="file" id="gustoInput" accept="image/*,video/*,audio/*">
-   <textarea id="textoGusto" placeholder="¿Qué nos gusta? (Canción, comida, película...)"></textarea>
-   <button onclick="subirGusto()">Añadir a la lista</button>
-
-   <div id="listaGustos" style="margin-top: 15px; display: flex; flex-direction: column; gap: 15px;"></div>
-
-  <button onclick="volver()">⬅ Volver</button>
-</div>
-
-
- <div id="fotoModal" onclick="if(event.target == this) cerrarModal()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:1000; justify-content:center; align-items:center; flex-direction:column; cursor:pointer;">
-  <span onclick="cerrarModal()" style="position:absolute; top:20px; right:30px; font-size:50px; color:white; cursor:pointer; font-weight:bold;">&times;</span>
-  <img id="imgModal" style="max-width:90%; max-height:80%; border-radius:15px; box-shadow: 0 0 30px rgba(0,0,0,0.5); cursor:default;" onclick="event.stopPropagation()">
-  <p id="textoModal" style="color:white; margin-top:20px; font-size:1.3rem; text-align:center; padding:0 20px; font-family: 'Segoe UI', sans-serif; cursor:default;" onclick="event.stopPropagation()"></p>
- </div>
 </body>
 </html>
