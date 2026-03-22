@@ -21,7 +21,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 //////////////////////////////////////////////////
-// 🔥 METAS
+// 🔥 METAS (Actualizada con Emoji y Tachado)
 //////////////////////////////////////////////////
 
 async function guardarMeta(texto) {
@@ -29,9 +29,11 @@ async function guardarMeta(texto) {
 
   await addDoc(collection(db, "metas"), {
     contenido: texto,
+    completada: false, // Nuevo campo para el estado
     fecha: new Date()
   });
 
+  document.getElementById("metaInput").value = ""; // Limpia el input
   cargarMetas();
 }
 
@@ -39,33 +41,60 @@ async function cargarMetas() {
   const lista = document.getElementById("lista");
   lista.innerHTML = "";
 
-  const querySnapshot = await getDocs(collection(db, "metas"));
+  // Ordenamos por fecha para que las nuevas aparezcan arriba o abajo
+  const q = query(collection(db, "metas"), orderBy("fecha", "desc"));
+  const querySnapshot = await getDocs(q);
 
   querySnapshot.forEach((docu) => {
+    const data = docu.data();
     const li = document.createElement("li");
+    li.style.cursor = "pointer";
 
-    li.style.display = "flex";
-    li.style.justifyContent = "space-between";
-    li.style.alignItems = "center";
-
+    // Contenedor para el texto y el emoji
+    const contenidoCuerpo = document.createElement("div");
+    contenidoCuerpo.style.display = "flex";
+    contenidoCuerpo.style.alignItems = "center";
+    contenidoCuerpo.style.gap = "10px";
+    
+    // Emoji dinámico: Corazón lleno si está lista, vacío si falta
+    const emoji = document.createElement("span");
+    emoji.textContent = data.completada ? "❤️" : "🤍";
+    
     const texto = document.createElement("span");
-    texto.textContent = docu.data().contenido;
+    texto.textContent = data.contenido;
 
-    const boton = document.createElement("span");
-    boton.textContent = "❌";
-    boton.style.cursor = "pointer";
+    // Aplicar tachado si está completada
+    if (data.completada) {
+      texto.style.textDecoration = "line-through";
+      texto.style.opacity = "0.6";
+    }
 
-    boton.onclick = () => borrarMeta(docu.id);
+    // Al hacer clic en el texto o emoji, se tacha/destacha
+    contenidoCuerpo.onclick = () => alternarMeta(docu.id, data.completada);
 
-    li.appendChild(texto);
-    li.appendChild(boton);
+    const botonBorrar = document.createElement("span");
+    botonBorrar.textContent = "❌";
+    botonBorrar.style.cursor = "pointer";
+    botonBorrar.onclick = (e) => {
+      e.stopPropagation(); // Evita que se tacha al intentar borrar
+      borrarMeta(docu.id);
+    };
+
+    contenidoCuerpo.appendChild(emoji);
+    contenidoCuerpo.appendChild(texto);
+    li.appendChild(contenidoCuerpo);
+    li.appendChild(botonBorrar);
 
     lista.appendChild(li);
   });
 }
 
-async function borrarMeta(id) {
-  await deleteDoc(doc(db, "metas", id));
+// Nueva función para cambiar el estado en Firebase
+async function alternarMeta(id, estadoActual) {
+  const metaRef = doc(db, "metas", id);
+  await updateDoc(metaRef, {
+    completada: !estadoActual
+  });
   cargarMetas();
 }
 
