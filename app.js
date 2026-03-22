@@ -432,7 +432,7 @@ async function cargarGustos() {
     const data = docu.data();
     const card = document.createElement("div");
     
-    card.style.background = "#334155";
+    card.style.background = "#fbcfe8";
     card.style.padding = "15px";
     card.style.borderRadius = "15px";
     card.style.position = "relative";
