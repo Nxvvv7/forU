@@ -339,9 +339,103 @@ function cerrarModal() {
   document.getElementById("fotoModal").style.display = "none";
 }
 
-// Hacerlas disponibles globalmente
-window.abrirModal = abrirModal;
-window.cerrarModal = cerrarModal;
+//////////////////////////////////////////////////
+// 🔥 GUSTOS (Multimedia + Texto + Fecha)
+//////////////////////////////////////////////////
+
+async function subirGusto() {
+  const input = document.getElementById("gustoInput");
+  const file = input.files[0];
+  const texto = document.getElementById("textoGusto").value;
+
+  if (!file && !texto) return; // Al menos debe haber texto o archivo
+
+  let url = "";
+  let tipo = "";
+
+  if (file) {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "mi_present");
+
+      // Cloudinary detecta automáticamente el tipo si usamos /auto/upload
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/dwnn2bgpf/auto/upload",
+        { method: "POST", body: formData }
+      );
+
+      const data = await response.json();
+      url = data.secure_url;
+      tipo = data.resource_type; // 'image', 'video' o 'raw' (para audio)
+    } catch (error) {
+      console.error("Error subiendo a Cloudinary:", error);
+    }
+  }
+
+  // Guardar en Firebase
+  await addDoc(collection(db, "gustos"), {
+    url: url,
+    texto: texto,
+    tipo: tipo,
+    fecha: new Date()// Guarda la fecha legible
+  });
+
+  // Limpiar y recargar
+  input.value = "";
+  document.getElementById("textoGusto").value = "";
+  cargarGustos();
+}
+
+async function cargarGustos() {
+  const contenedor = document.getElementById("listaGustos");
+  contenedor.innerHTML = "";
+
+  // 1. Creamos la consulta ordenada por el campo "fecha"
+  // Use "desc" si quieres lo más nuevo arriba, o quítalo para lo más viejo arriba
+  const q = query(collection(db, "gustos"), orderBy("fecha", "desc"));
+
+  // 2. Usamos la consulta 'q' en lugar de la colección directa
+  const querySnapshot = await getDocs(q);
+
+  querySnapshot.forEach((docu) => {
+    const data = docu.data();
+    const card = document.createElement("div");
+    
+    card.style.background = "#334155";
+    card.style.padding = "15px";
+    card.style.borderRadius = "15px";
+    card.style.position = "relative";
+    card.style.marginBottom = "10px";
+
+    let mediaHTML = "";
+    if (data.url) {
+      if (data.tipo === "image") {
+        mediaHTML = `<img src="${data.url}" style="width:100%; border-radius:10px; cursor:pointer;" onclick="abrirModal('${data.url}', '${data.texto}')">`;
+      } else if (data.tipo === "video") {
+        mediaHTML = `<video src="${data.url}" controls style="width:100%; border-radius:10px;"></video>`;
+      } else if (data.tipo === "raw" || data.url.includes("mp3") || data.url.includes("wav")) {
+        mediaHTML = `<audio src="${data.url}" controls style="width:100%;"></audio>`;
+      }
+    }
+
+    card.innerHTML = `
+      <span style="position:absolute; top:10px; right:15px; cursor:pointer; font-weight:bold;" onclick="borrarGusto('${docu.id}')">❌</span>
+      ${mediaHTML}
+      <p style="margin: 10px 0 5px 0; color: white;">${data.texto}</p>
+      <small style="opacity:0.5; font-size:10px;">${data.fecha}</small>
+    `;
+
+    contenedor.appendChild(card);
+  });
+}
+
+async function borrarGusto(id) {
+  if(confirm("¿Borrar este gusto?")) {
+    await deleteDoc(doc(db, "gustos", id));
+    cargarGustos();
+  }
+}
 //////////////////////////////////////////////////
 // 🔥 GLOBAL
 //////////////////////////////////////////////////
@@ -353,6 +447,9 @@ window.crearSorpresa = crearSorpresa;
 window.sumarClick = sumarClick;
 window.abrirModal = abrirModal;
 window.cerrarModal = cerrarModal;
+window.subirGusto = subirGusto;
+window.borrarGusto = borrarGusto;
 escucharChat();
 cargarMetas();
 cargarFotos();
+cargarGustos();
