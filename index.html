@@ -167,6 +167,49 @@
       flex-direction: column;
       cursor: pointer;
     }
+    /* --- Añade esto dentro de tu etiqueta <style> --- */
+
+    /* Estilos para el elemento de la lista de metas */
+    #lista li {
+      position: relative; /* Necesario para posicionar el botón de borrar */
+      background: rgba(255, 255, 255, 0.4); /* Fondo translúcido para que combine */
+      padding: 15px 40px 15px 15px; /* Padding extra a la derecha para la X */
+      border-radius: 15px;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      display: flex; /* Mantenemos flex para alinear emoji y texto */
+      align-items: center;
+      transition: background 0.3s;
+    }
+
+    #lista li:hover {
+      background: rgba(255, 255, 255, 0.6);
+    }   
+
+    /* Estilo para el botón de borrar meta */
+    .borrar-meta {
+      position: absolute;
+      bottom: 8px; /* Separación desde abajo */
+      right: 12px; /* Separación desde la derecha */
+      cursor: pointer;
+      font-size: 14px; /* Un poco más pequeño para que no estorbe */
+      color: #e57373; /* Un rojo suave */
+      opacity: 0.6; /* Un poco transparente por defecto */
+      transition: opacity 0.3s, transform 0.2s;
+      z-index: 5; /* Asegura que esté sobre el texto */
+    }
+
+    .borrar-meta:hover {
+      opacity: 1; /* Se ve claro al pasar el ratón */
+      transform: scale(1.1); /* Efecto sutil de agrandamiento */
+    }
+
+    /* Ajuste para el texto de la meta para que no se superponga con la X */
+    .meta-texto {
+      flex: 1; /* Toma todo el espacio disponible */
+      margin-right: 15px; /* Espacio antes de la X */
+      word-break: break-word; /* Rompe palabras largas si es necesario */
+    } 
   </style>
 </head>
 <body>
