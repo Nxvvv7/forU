@@ -340,7 +340,7 @@ async function verificarSorpresa() {
     }
 
     contenedor.innerHTML = `
-      <div style="margin-top:10px; padding:10px; background:#22c55e; border-radius:10px;">
+      <div style="margin-top:10px; padding:10px; background: #fbcfe8; border-radius:10px;">
         <h3>🎉 Sorpresa desbloqueada</h3>
         <p>${sorpresaEncontrada.mensaje}</p>
         ${extra}
