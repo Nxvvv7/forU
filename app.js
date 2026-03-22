@@ -80,7 +80,66 @@ async function cargarMetas() {
     lista.appendChild(li);
   });
 }
+async function cargarMetas() {
+  const lista = document.getElementById("lista");
+  lista.innerHTML = "";
 
+  // Ordenamos por fecha para que las nuevas aparezcan arriba o abajo
+  const q = query(collection(db, "metas"), orderBy("fecha", "desc"));
+  const querySnapshot = await getDocs(q);
+
+  querySnapshot.forEach((docu) => {
+    const data = docu.data();
+    const li = document.createElement("li");
+    li.style.cursor = "pointer";
+
+    // Contenedor para el texto y el emoji
+    const contenidoCuerpo = document.createElement("div");
+    contenidoCuerpo.style.display = "flex";
+    contenidoCuerpo.style.alignItems = "center";
+    contenidoCuerpo.style.gap = "10px";
+    
+    // Emoji dinámico: Corazón lleno si está lista, vacío si falta
+    const emoji = document.createElement("span");
+    emoji.textContent = data.completada ? "❤️" : "🤍";
+    
+    const texto = document.createElement("span");
+    texto.textContent = data.contenido;
+
+    // Aplicar tachado si está completada
+    if (data.completada) {
+      texto.style.textDecoration = "line-through";
+      texto.style.opacity = "0.6";
+    }
+
+    // Al hacer clic en el texto o emoji, se tacha/destacha
+    contenidoCuerpo.onclick = () => alternarMeta(docu.id, data.completada);
+
+    const botonBorrar = document.createElement("span");
+    botonBorrar.textContent = "❌";
+    botonBorrar.style.cursor = "pointer";
+    botonBorrar.onclick = (e) => {
+      e.stopPropagation(); // Evita que se tacha al intentar borrar
+      borrarMeta(docu.id);
+    };
+
+    contenidoCuerpo.appendChild(emoji);
+    contenidoCuerpo.appendChild(texto);
+    li.appendChild(contenidoCuerpo);
+    li.appendChild(botonBorrar);
+
+    lista.appendChild(li);
+  });
+}
+
+// Nueva función para cambiar el estado en Firebase
+async function alternarMeta(id, estadoActual) {
+  const metaRef = doc(db, "metas", id);
+  await updateDoc(metaRef, {
+    completada: !estadoActual
+  });
+  cargarMetas();
+}
 //////////////////////////////////////////////////
 // 🔥 FOTOS (Cloudinary)
 //////////////////////////////////////////////////
