@@ -21,105 +21,73 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 //////////////////////////////////////////////////
-// 🔥 METAS (Actualizada con Posicionamiento de X)
+// 🔥 METAS (Corregido y Completo)
 //////////////////////////////////////////////////
 
-// ... (las funciones guardarMeta y alternarMeta se mantienen igual) ...
-
-async function cargarMetas() {
-  const lista = document.getElementById("lista");
-  lista.innerHTML = "";
-
-  // Ordenamos por fecha para que las nuevas aparezcan arriba o abajo
-  const q = query(collection(db, "metas"), orderBy("fecha", "desc"));
-  const querySnapshot = await getDocs(q);
-
-  querySnapshot.forEach((docu) => {
-    const data = docu.data();
-    const li = document.createElement("li");
-    // li.className = "meta-item"; // Si quieres añadir una clase general
-
-    // Contenedor para el texto y el emoji (mismo que antes)
-    const contenidoCuerpo = document.createElement("div");
-    contenidoCuerpo.style.display = "flex";
-    contenidoCuerpo.style.alignItems = "center";
-    contenidoCuerpo.style.gap = "10px";
-    contenidoCuerpo.style.cursor = "pointer"; // Cursor de mano sobre el texto
-    
-    // Emoji dinámico: Corazón lleno si está lista, vacío si falta
-    const emoji = document.createElement("span");
-    emoji.textContent = data.completada ? "❤️" : "🤍";
-    
-    const texto = document.createElement("span");
-    texto.className = "meta-texto"; // <--- AÑADIR CLASE
-    texto.textContent = data.contenido;
-
-    // Aplicar tachado si está completada (mismo que antes)
-    if (data.completada) {
-      texto.style.textDecoration = "line-through";
-      texto.style.opacity = "0.6";
-    }
-
-    // Al hacer clic en el texto o emoji, se tacha/destacha (mismo que antes)
-    contenidoCuerpo.onclick = () => alternarMeta(docu.id, data.completada);
-
-    // NUEVO: Botón de borrar con clase y posicionamiento
-    const botonBorrar = document.createElement("span");
-    botonBorrar.textContent = "❌";
-    botonBorrar.className = "borrar-meta"; // <--- AÑADIR CLASE
-    botonBorrar.onclick = (e) => {
-      e.stopPropagation(); // Evita que se tacha al intentar borrar
-      borrarMeta(docu.id);
-    };
-
-    contenidoCuerpo.appendChild(emoji);
-    contenidoCuerpo.appendChild(texto);
-    li.appendChild(contenidoCuerpo);
-    li.appendChild(botonBorrar); // La X ahora se posiciona absolutamente
-
-    lista.appendChild(li);
+async function guardarMeta(texto) {
+  if (!texto) return;
+  // Usamos serverTimestamp para que la fecha sea consistente
+  await addDoc(collection(db, "metas"), {
+    contenido: texto,
+    completada: false,
+    fecha: serverTimestamp() 
   });
+  document.getElementById("metaInput").value = "";
+  cargarMetas();
 }
+
+async function alternarMeta(id, estadoActual) {
+  const metaRef = doc(db, "metas", id);
+  await updateDoc(metaRef, {
+    completada: !estadoActual
+  });
+  cargarMetas();
+}
+
+async function borrarMeta(id) {
+  if(confirm("¿Borrar esta meta?")) {
+    await deleteDoc(doc(db, "metas", id));
+    cargarMetas();
+  }
+}
+
 async function cargarMetas() {
   const lista = document.getElementById("lista");
   lista.innerHTML = "";
 
-  // Ordenamos por fecha para que las nuevas aparezcan arriba o abajo
   const q = query(collection(db, "metas"), orderBy("fecha", "desc"));
   const querySnapshot = await getDocs(q);
 
   querySnapshot.forEach((docu) => {
     const data = docu.data();
     const li = document.createElement("li");
-    li.style.cursor = "pointer";
+    li.className = "meta-item"; // Para el CSS que te pasaré abajo
 
-    // Contenedor para el texto y el emoji
     const contenidoCuerpo = document.createElement("div");
     contenidoCuerpo.style.display = "flex";
     contenidoCuerpo.style.alignItems = "center";
     contenidoCuerpo.style.gap = "10px";
+    contenidoCuerpo.style.cursor = "pointer";
     
-    // Emoji dinámico: Corazón lleno si está lista, vacío si falta
     const emoji = document.createElement("span");
     emoji.textContent = data.completada ? "❤️" : "🤍";
     
     const texto = document.createElement("span");
+    texto.className = "meta-texto";
     texto.textContent = data.contenido;
 
-    // Aplicar tachado si está completada
     if (data.completada) {
       texto.style.textDecoration = "line-through";
       texto.style.opacity = "0.6";
     }
 
-    // Al hacer clic en el texto o emoji, se tacha/destacha
     contenidoCuerpo.onclick = () => alternarMeta(docu.id, data.completada);
 
     const botonBorrar = document.createElement("span");
     botonBorrar.textContent = "❌";
-    botonBorrar.style.cursor = "pointer";
+    botonBorrar.className = "borrar-meta"; 
     botonBorrar.onclick = (e) => {
-      e.stopPropagation(); // Evita que se tacha al intentar borrar
+      e.stopPropagation(); 
       borrarMeta(docu.id);
     };
 
@@ -130,15 +98,6 @@ async function cargarMetas() {
 
     lista.appendChild(li);
   });
-}
-
-// Nueva función para cambiar el estado en Firebase
-async function alternarMeta(id, estadoActual) {
-  const metaRef = doc(db, "metas", id);
-  await updateDoc(metaRef, {
-    completada: !estadoActual
-  });
-  cargarMetas();
 }
 //////////////////////////////////////////////////
 // 🔥 FOTOS (Cloudinary)
