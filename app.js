@@ -452,7 +452,6 @@ async function borrarGusto(id) {
 // 🔥 GLOBAL
 //////////////////////////////////////////////////
 
-window.guardarMeta = guardarMeta;
 window.subirFoto = subirFoto; // 🔥 IMPORTANTE
 window.enviarMensaje = enviarMensaje;
 window.crearSorpresa = crearSorpresa;
@@ -461,6 +460,9 @@ window.abrirModal = abrirModal;
 window.cerrarModal = cerrarModal;
 window.subirGusto = subirGusto;
 window.borrarGusto = borrarGusto;
+window.guardarMeta = guardarMeta;
+window.borrarMeta = borrarMeta;
+window.alternarMeta = alternarMeta;
 escucharChat();
 cargarMetas();
 cargarFotos();
