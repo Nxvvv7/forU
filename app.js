@@ -223,7 +223,7 @@ function escucharChat() {
       const burbuja = document.createElement("div");
       burbuja.textContent = data.texto;
 
-      burbuja.style.background = esMio ? "#22c55e" : "#334155";
+      burbuja.style.background = esMio ? "#95ebb9" : "#334155";
       burbuja.style.color = "white";
       burbuja.style.padding = "8px 12px";
       burbuja.style.borderRadius = "15px";
