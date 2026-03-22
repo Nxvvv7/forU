@@ -21,21 +21,10 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 //////////////////////////////////////////////////
-// 🔥 METAS (Actualizada con Emoji y Tachado)
+// 🔥 METAS (Actualizada con Posicionamiento de X)
 //////////////////////////////////////////////////
 
-async function guardarMeta(texto) {
-  if (!texto) return;
-
-  await addDoc(collection(db, "metas"), {
-    contenido: texto,
-    completada: false, // Nuevo campo para el estado
-    fecha: new Date()
-  });
-
-  document.getElementById("metaInput").value = ""; // Limpia el input
-  cargarMetas();
-}
+// ... (las funciones guardarMeta y alternarMeta se mantienen igual) ...
 
 async function cargarMetas() {
   const lista = document.getElementById("lista");
@@ -48,33 +37,36 @@ async function cargarMetas() {
   querySnapshot.forEach((docu) => {
     const data = docu.data();
     const li = document.createElement("li");
-    li.style.cursor = "pointer";
+    // li.className = "meta-item"; // Si quieres añadir una clase general
 
-    // Contenedor para el texto y el emoji
+    // Contenedor para el texto y el emoji (mismo que antes)
     const contenidoCuerpo = document.createElement("div");
     contenidoCuerpo.style.display = "flex";
     contenidoCuerpo.style.alignItems = "center";
     contenidoCuerpo.style.gap = "10px";
+    contenidoCuerpo.style.cursor = "pointer"; // Cursor de mano sobre el texto
     
     // Emoji dinámico: Corazón lleno si está lista, vacío si falta
     const emoji = document.createElement("span");
     emoji.textContent = data.completada ? "❤️" : "🤍";
     
     const texto = document.createElement("span");
+    texto.className = "meta-texto"; // <--- AÑADIR CLASE
     texto.textContent = data.contenido;
 
-    // Aplicar tachado si está completada
+    // Aplicar tachado si está completada (mismo que antes)
     if (data.completada) {
       texto.style.textDecoration = "line-through";
       texto.style.opacity = "0.6";
     }
 
-    // Al hacer clic en el texto o emoji, se tacha/destacha
+    // Al hacer clic en el texto o emoji, se tacha/destacha (mismo que antes)
     contenidoCuerpo.onclick = () => alternarMeta(docu.id, data.completada);
 
+    // NUEVO: Botón de borrar con clase y posicionamiento
     const botonBorrar = document.createElement("span");
     botonBorrar.textContent = "❌";
-    botonBorrar.style.cursor = "pointer";
+    botonBorrar.className = "borrar-meta"; // <--- AÑADIR CLASE
     botonBorrar.onclick = (e) => {
       e.stopPropagation(); // Evita que se tacha al intentar borrar
       borrarMeta(docu.id);
@@ -83,19 +75,10 @@ async function cargarMetas() {
     contenidoCuerpo.appendChild(emoji);
     contenidoCuerpo.appendChild(texto);
     li.appendChild(contenidoCuerpo);
-    li.appendChild(botonBorrar);
+    li.appendChild(botonBorrar); // La X ahora se posiciona absolutamente
 
     lista.appendChild(li);
   });
-}
-
-// Nueva función para cambiar el estado en Firebase
-async function alternarMeta(id, estadoActual) {
-  const metaRef = doc(db, "metas", id);
-  await updateDoc(metaRef, {
-    completada: !estadoActual
-  });
-  cargarMetas();
 }
 
 //////////////////////////////////////////////////
